@@ -4,7 +4,7 @@
  *	Assignment: Lab #7  Exercise #1
  *	Exercise Description: [optional - include for your own benefit]
  *
- *  Link To Vid:
+ *  Link To Vid: https://youtu.be/XWzqbJSc08I
  *
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -13,7 +13,7 @@
 #include <avr/io.h>
 #include "../header/timer.h"
 #include "../header/io.h"
-#include "io.c"
+//#include "io.c"
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
@@ -89,16 +89,19 @@ void Tick() {
       if (currA == 0x01 && outputC <= 8) {
         outputC = outputC + 1;
         LCD_WriteData(outputC + '0');
+        LCD_Cursor(1);
         cnt++;
       }
       else if (currA == 0x02 && outputC >= 1){
         outputC = outputC - 1;
         LCD_WriteData(outputC + '0');
+        LCD_Cursor(1);
         cnt++;
       }
       else if (currA == 0x03) {
         outputC = 0x00;
         LCD_WriteData(outputC + '0');
+        LCD_Cursor(1);
         cnt++;
       }
       break;
@@ -113,10 +116,12 @@ void Tick() {
       if (holdA == 0x01 && outputC <= 8) {
         outputC = outputC + 1;
         LCD_WriteData(outputC + '0');
+        LCD_Cursor(1);
       }
       else if (holdA == 0x02 && outputC >= 1) {
         outputC = outputC - 1;
         LCD_WriteData(outputC + '0');
+        LCD_Cursor(1);
       }
       break;
 
@@ -135,6 +140,9 @@ int main(void) {
     TimerOn();
     SM_State = SM_Start;
     LCD_init();
+    LCD_Cursor(1);
+    LCD_WriteData(0 + '0');
+    LCD_Cursor(1);
     /* Insert your solution below */
     while (1) {
       Tick();
