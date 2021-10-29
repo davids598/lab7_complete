@@ -4,7 +4,7 @@
  *	Assignment: Lab #7  Exercise #2
  *	Exercise Description: [optional - include for your own benefit]
  *
- *  Link To Vid: https://youtu.be/x4IwtRQ24ag 
+ *  Link To Vid: https://youtu.be/9Vct95wK-rA 
  *
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -17,19 +17,23 @@
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
-enum SM_States { SM_LOOP, SM_HOLD, SM_HF } SM_State;
+enum SM_States { SM_LOOP, SM_HOLD, SM_HF, SM_HOLD_WIN } SM_State;
 unsigned int iterate[] = {0x01, 0x02, 0x04};
 signed char i = 0x00;
 unsigned char path = 0x00; //0 = forward. 1 = backwards
 unsigned char counter = 0x05;
 unsigned char currA = 0x00;
 unsigned char holdA = 0x00;
+unsigned char holdWinA = 0x00;
 unsigned char holdHFA = 0x00;
 void Tick() {
   switch(SM_State) {
     case SM_LOOP:
       currA = ~PINA;
-      if (currA == 0x01) {
+      if (counter >= 9) {
+        SM_State = SM_HOLD_WIN;
+      }
+      else if (currA == 0x01) {
         SM_State = SM_HOLD;
       } else {
         SM_State = SM_LOOP;
@@ -37,6 +41,10 @@ void Tick() {
       break;
 
     case SM_HOLD:
+      if (counter >= 9) {
+        SM_State = SM_HOLD_WIN;
+        break;
+      }
       holdA = ~PINA;
       if (holdA == 0x00) {
         SM_State = SM_HF;
@@ -45,9 +53,21 @@ void Tick() {
       }
       break;
 
+      case SM_HOLD_WIN:
+        holdWinA = ~PINA;
+        if (holdWinA == 0x01) {
+          SM_State = SM_HF;
+        } else {
+          SM_State = SM_HOLD_WIN;
+        }
+        break;
+
     case SM_HF:
     holdHFA = ~PINA;
-      if (holdHFA == 0x01) {
+      if (holdHFA == 0x00 && counter >= 9) {
+        SM_State = SM_HF;
+      }
+      else if (holdHFA == 0x01) {
         SM_State = SM_LOOP;
       } else {
         SM_State = SM_HF;
@@ -94,6 +114,15 @@ void Tick() {
         LCD_DisplayString(1, "Nice Work");
         LCD_Cursor(12);
       }
+      break;
+
+    case SM_HOLD_WIN:
+      if (counter >= 9) {
+        LCD_Cursor(1);
+        LCD_DisplayString(1, "Nice Work");
+        LCD_Cursor(12);
+      }
+      break;
 
     case SM_HF:
       if (counter >= 9) {
